@@ -9,7 +9,7 @@
 const fs = require('fs'); // For writing a new file
 
 // Use most up-to-date Default Cards Bulk Data JSON from Scryfall
-const cards = require('./default-cards-20210322210259.json');
+const cards = require('./default-cards-20210412090313.json');
 
 // Properties to remove from cards array
 const unwantedProperties = [
@@ -28,7 +28,7 @@ const unwantedProperties = [
      * nestedArray is used if the structure of the property is 'property -> array -> object -> properties' */
 const nestedProperties = [
     {   property: "image_uris",
-        nestedObject: ["large", "png", "art_crop", "border_crop"]},
+        nestedObject: ["small", "normal", "large", "png", "art_crop"]},
     {   property: "legalities",
         nestedObject: ["future", "gladiator", "modern", "legacy", "pauper", "vintage", "penny", "commander", "duel", "oldschool", "premodern" ]},
     {   property: "card_faces",
