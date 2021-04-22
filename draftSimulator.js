@@ -1,3 +1,5 @@
+const fs = require('fs'); // For writing a new file
+
 const premierDraft = {
     entry: { gold: 10000, gems: 1500 },
     rewards: [
@@ -78,9 +80,28 @@ function draftSimulator(draft, winRate) {
     }
 
     // Return number of gems and packs
-    return { gems: reward.gems, packs: reward.packs, wins: wins };
+    return { gems: reward.gems, packs: reward.packs, wins: wins, losses: losses};
 }
 
-for (let i=0; i<5; i++) {
-    console.log(draftSimulator(premierDraft, 0.50));
+let lookup = {};
+let winRate = 0;
+const numDrafts = 1000;
+draft = traditionalDraft;
+
+for (; winRate < 1.01; winRate += 0.01) {
+
+    let totalGems = 0;
+    let totalPacks = 0;
+    
+    for (let i=0; i<numDrafts; i++) {
+    
+        const { gems, packs } = draftSimulator(draft, winRate);
+    
+        totalGems += gems;
+        totalPacks += packs;
+    }
+
+    lookup[winRate.toFixed(2)] = { avgGems: totalGems/numDrafts, avgPacks: totalPacks/numDrafts };
 }
+
+fs.writeFileSync("traditionalLookup.json", JSON.stringify(lookup));
