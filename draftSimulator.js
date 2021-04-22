@@ -70,23 +70,24 @@ function draftSimulator(draft, winRate) {
     }
 
     // Decide rewards based on wins
-    let reward = draft.rewards[wins];
+    let gems = draft.rewards[wins].gems;
+    let packs = draft.rewards[wins].packs;
 
     // Decide if bonus pack is awarded
-    if (reward.bonusPacks) {
-        if (reward.bonusPacks >= Math.random()) {
-            reward.packs++;
+    if (draft.rewards[wins].bonusPacks) {
+        if (draft.rewards[wins].bonusPacks >= Math.random()) {
+            packs++;
         }
     }
 
     // Return number of gems and packs
-    return { gems: reward.gems, packs: reward.packs, wins: wins, losses: losses};
+    return { gems: gems, packs: packs, wins: wins, losses: losses};
 }
 
 let lookup = {};
 let winRate = 0;
-const numDrafts = 1000;
-draft = traditionalDraft;
+const numDrafts = 10000000;
+draft = quickDraft;
 
 for (; winRate < 1.01; winRate += 0.01) {
 
@@ -102,6 +103,8 @@ for (; winRate < 1.01; winRate += 0.01) {
     }
 
     lookup[winRate.toFixed(2)] = { avgGems: totalGems/numDrafts, avgPacks: totalPacks/numDrafts };
+
+    console.log(`${Math.round(winRate*100)}%`);
 }
 
-fs.writeFileSync("traditionalLookup.json", JSON.stringify(lookup));
+fs.writeFileSync("quickLookup.json", JSON.stringify(lookup));
