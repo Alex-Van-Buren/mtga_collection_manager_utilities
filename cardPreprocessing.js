@@ -9,7 +9,7 @@
 const fs = require('fs'); // For writing a new file
 
 // Use most up-to-date Default Cards Bulk Data JSON from Scryfall
-const cards = require('./default-cards-20210412090313.json');
+const cards = require('./default-cards-20210525090353.json');
 
 // Properties to remove from cards array
 const unwantedProperties = [
@@ -18,7 +18,7 @@ const unwantedProperties = [
     "set_search_uri", "scryfall_set_uri", "rulings_uri","prints_search_uri", "collector_number", "digital", "card_back_id", "artist",
     "artist_ids", "illustration_id", "border_color", "frame", "full_art", "textless", "story_spotlight", "edhrec_rank", "prices",
     "related_uris", "mtgo_id", "mtgo_foil_id", "all_parts", "watermark", "flavor_text", "image_status","preview", "produced_mana",
-    "frame_effects"
+    "frame_effects", "set_name"
 ]
 
 /* Nested properties to remove from cards array
@@ -39,7 +39,7 @@ const nestedProperties = [
 let finalCards = [];
 
 // Preprocess cards, removing all without an arena id, and removing undesired properties
-cards.forEach(card => {
+for ( const card of cards ) {
 
     try {
         // Don't add cards to the finalCards array that don't have an arena ID
@@ -48,6 +48,12 @@ cards.forEach(card => {
             // Do nothing, move onto the next card; card isn't added to final card array
 
         } else { // Is an arena card, requires preprocessing
+
+            // Remove cards that have an arena_id but are not in english
+            if ( card.hasOwnProperty('lang') && card.lang !== "en") {
+                // go on to next card and do not add this card to the finalCards array
+                continue;
+            }
 
             // Try to remove properties listed in unwantedProperties array
             unwantedProperties.forEach( prop => {
@@ -105,7 +111,7 @@ cards.forEach(card => {
         console.log(`Unable to process: ${card.name}... Skipping`);
         console.log(error);
     }
-}); // end cards.forEach
+} // end for cards
 
 /* Format file name as 'arenaCards' + (current data and time) + '.json'
    - (current data and time) formatted as 'YYYYMMDD' + UTC (without spaces or separators)
