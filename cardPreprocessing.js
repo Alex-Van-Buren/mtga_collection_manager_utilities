@@ -39,7 +39,7 @@ const nestedProperties = [
 let finalCards = [];
 
 // Preprocess cards, removing all without an arena id, and removing undesired properties
-for ( const card of cards ) {
+for ( let card of cards ) {
 
     try {
         // Don't add cards to the finalCards array that don't have an arena ID
@@ -102,8 +102,13 @@ for ( const card of cards ) {
                 }
             });
 
+            // Change some card Properties
+            card = changeProperties(card);
+
             // Preprocessing complete for this card, add it to the final array
-            finalCards.push(card);
+            if ( filterAltArt(card.arena_Id, card.promo_types, card.set)) {
+                finalCards.push(card);
+            }
 
         } // end else (is an arena card and requires preprocessing)
         
@@ -113,6 +118,66 @@ for ( const card of cards ) {
     }
 } // end for cards
 
+/**
+ * Filter out alternate art and problem cards.
+ * @param {number} cardId ID of the card.
+ * @param {Array} cardPromoTypes 
+ * @param {string} setId set code
+ * @returns True if the card is not an alternate art card, false otherwise.
+ */
+ function filterAltArt(cardId, cardPromoTypes, setId) {
+
+    // Problem cards that require a special filter
+    // Realmwalker and Orah buy-a-box promos that also appear in the regular set
+    // Special alt art of Reflections of Littjara doesn't appear in-game but has arena_id for some reason
+    if (cardId === 75382 || cardId === 75910 || cardId === 75381) {
+        // Don't add
+        return false;
+    }
+
+    // Keep all of strixhaven mystical archives
+    if (setId === 'sta') {
+        return true;
+    }
+
+    // Check if the card has promo types
+    if ( cardPromoTypes ) {
+
+        // TODO: For special sets this might not work (eg mystical archives)
+        // if the card doesn't have boosterfun in promo types --> keep it
+        if ( cardPromoTypes.includes("boosterfun") === false ) {
+
+            return true
+        }
+
+        // Otherwise filter out this alt-art card
+        return false;
+    }
+    // Else the card doesn't have promo_types and no filtering is necessary        
+    return true;
+}
+
+/**
+ * Some cards have properties that are difficult to work with or are not correct for our purposes.
+ * This function changes them
+ * @param {Object} card Card object
+ * @returns Card with properties altered if they needed to be changed
+ */
+function changeProperties(card) {
+    // Make a copy of the card
+    let newCard = {...card};
+
+    // Change arena exclusive jumpstart cards to jumpstart and make booster true
+    if (card.set === 'ajmp') {
+        newCard.set = 'jmp';
+        newCard.booster = true;
+    }
+
+    if (card.set === 'sta') {
+        newCard.booster = true;
+    }
+    return newCard;
+}
 /* Format file name as 'arenaCards' + (current data and time) + '.json'
    - (current data and time) formatted as 'YYYYMMDD' + UTC (without spaces or separators)
    - e.g. arenaCards202101010000.json */
