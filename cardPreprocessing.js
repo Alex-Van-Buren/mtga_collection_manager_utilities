@@ -9,7 +9,35 @@
 const fs = require('fs'); // For writing a new file
 
 // Use most up-to-date Default Cards Bulk Data JSON from Scryfall
-const cards = require('./default-cards-20210525090353.json');
+const cards = require('./default-cards-20210604090309.json');
+
+const addArenaIds = [
+    // {name: "Atarka's Command",              arena_id: 60959},
+    // {name: "Ancient Grudge",                arena_id: 42618},
+    // {name: "Court Homunculus",              arena_id: 46873},
+    // {name: "Dromoka's Command",             arena_id: 60975},
+    // {name: "Dragonstorm",                   arena_id: 18892},
+    // {name: "Elesh Norn, Grand Cenobite",    arena_id: 50871},
+    // {name: "Grisly Salvage",                arena_id: 51619},
+    // {name: "Into the North",                arena_id: 24649},
+    // {name: "Intangible Virtue",             arena_id: 42684},
+    // {name: "Ichor Wellspring",              arena_id: 39339},
+    // {name: "Jin-Gitaxias, Core Augur",      arena_id: 50873},
+    // {name: "Kolaghan's Command",            arena_id: 60981},
+    // {name: "Merfolk Looter",                arena_id: 32925},
+    // {name: "Ojutai's Command",              arena_id: 60987},
+    // {name: "Reverse Engineer",              arena_id: 64261},
+    // {name: "Relic of Progenitus",           arena_id: 30895},
+    // {name: "Ray of Revelation",             arena_id: 43257},
+    // {name: "Stifle",                        arena_id: 18902},
+    // {name: "Silumgar's Command",            arena_id: 60997},
+    // {name: "Sheoldred, Whispering One",     arena_id: 50875},
+    // {name: "Trash for Treasure",            arena_id: 78136},
+    // {name: "Urabrask the Hidden",           arena_id: 39738},
+    // {name: "Vault Skirge",                  arena_id: 39770},
+    // {name: "Vorinclex, Voice of Hunger",    arena_id: 50879},
+    // {name: "Whirler Rogue",                 arena_id: 61231}
+];
 
 // Properties to remove from cards array
 const unwantedProperties = [
@@ -42,75 +70,93 @@ let finalCards = [];
 for ( let card of cards ) {
 
     try {
-        // Don't add cards to the finalCards array that don't have an arena ID
+        // Don't add cards to the finalCards array that don't have an arena ID (unless they're in a set we need to add arena_id's to)
         if (!card.hasOwnProperty("arena_id")) {
 
-            // Do nothing, move onto the next card; card isn't added to final card array
+            // Check if this card belongs to a set that we need to add arena_id's to
+            if (card.set === "ha5") {
 
-        } else { // Is an arena card, requires preprocessing
+                // Loop through the set we need to add arena_id's for
+                for (const matchCard of addArenaIds) {
 
-            // Remove cards that have an arena_id but are not in english
-            if ( card.hasOwnProperty('lang') && card.lang !== "en") {
-                // go on to next card and do not add this card to the finalCards array
-                continue;
-            }
-
-            // Try to remove properties listed in unwantedProperties array
-            unwantedProperties.forEach( prop => {
-
-                if (card.hasOwnProperty(prop))
-                    delete card[prop];
-            });
-            
-            // Some properties contain objects or arrays, and we only want to keep some of those values
-            //  therefore check for those values listed in nestedProperties
-            nestedProperties.forEach( npObject => {
-
-                // Case 1: nestedProperties object has a nestedObject value
-                //  therefore: structured as, 'property -> object -> properties'
-                if (npObject.hasOwnProperty("nestedObject")) {
-
-                    // Try to remove all values listed in nestedObject
-                    npObject.nestedObject.forEach( nestProp => {
-
-                        // ...if both the property and nested property exist for the card
-                        if ( card.hasOwnProperty(npObject.property) && card[npObject.property].hasOwnProperty(nestProp))
-                            delete card[npObject.property][nestProp];
-                    });
-                }
-                // Case 2: nestedProperties object has a nestedArray value
-                //  therefore structured as, 'property -> array -> object -> properties'
-                else if (npObject.hasOwnProperty("nestedArray")) {
-
-                    // Check if the card has the property listed in the nestedProperties array (e.g. card_faces)
-                    if (card.hasOwnProperty(npObject.property)) {
-
-                        // Loop through each object nested within a property of the card, call this objInProp
-                        card[npObject.property].forEach( objInProp => {
-                            const index = objInProp.index;
-
-                            // Loop through each of the properties that we want to remove (from nestedProperties.nestedArray)
-                            npObject.nestedArray.forEach(nestProp => {
-
-                                // Check if that property exists within the card and remove it if it does
-                                if ( objInProp.hasOwnProperty(nestProp) ) {
-                                    delete objInProp[nestProp.toString()];
-                                }
-                            });
-                        });
+                    // Add the arena_id if the card names match
+                    if (card.name === matchCard.name) {
+                        card.arena_id = matchCard.arena_id;
+                        break; // Stop this loop through this set, card has arena_id added
                     }
                 }
-            });
-
-            // Change some card Properties
-            card = changeProperties(card);
-
-            // Preprocessing complete for this card, add it to the final array
-            if ( filterAltArt(card.arena_Id, card.promo_types, card.set)) {
-                finalCards.push(card);
             }
 
-        } // end else (is an arena card and requires preprocessing)
+            // Do nothing, move onto the next card; card isn't added to final card array
+            else {
+                continue;
+            }
+        }
+
+        /* Card is an arena card, requires preprocessing */
+
+        // Remove cards that have an arena_id but are not in english
+        if ( card.hasOwnProperty('lang') && card.lang !== "en") {
+            // go on to next card and do not add this card to the finalCards array
+            continue;
+        }
+
+        // Try to remove properties listed in unwantedProperties array
+        unwantedProperties.forEach( prop => {
+
+            if (card.hasOwnProperty(prop))
+                delete card[prop];
+        });
+        
+        // Some properties contain objects or arrays, and we only want to keep some of those values
+        //  therefore check for those values listed in nestedProperties
+        nestedProperties.forEach( npObject => {
+
+            // Case 1: nestedProperties object has a nestedObject value
+            //  therefore: structured as, 'property -> object -> properties'
+            if (npObject.hasOwnProperty("nestedObject")) {
+
+                // Try to remove all values listed in nestedObject
+                npObject.nestedObject.forEach( nestProp => {
+
+                    // ...if both the property and nested property exist for the card
+                    if ( card.hasOwnProperty(npObject.property) && card[npObject.property].hasOwnProperty(nestProp))
+                        delete card[npObject.property][nestProp];
+                });
+            }
+            // Case 2: nestedProperties object has a nestedArray value
+            //  therefore structured as, 'property -> array -> object -> properties'
+            else if (npObject.hasOwnProperty("nestedArray")) {
+
+                // Check if the card has the property listed in the nestedProperties array (e.g. card_faces)
+                if (card.hasOwnProperty(npObject.property)) {
+
+                    // Loop through each object nested within a property of the card, call this objInProp
+                    card[npObject.property].forEach( objInProp => {
+                        const index = objInProp.index;
+
+                        // Loop through each of the properties that we want to remove (from nestedProperties.nestedArray)
+                        npObject.nestedArray.forEach(nestProp => {
+
+                            // Check if that property exists within the card and remove it if it does
+                            if ( objInProp.hasOwnProperty(nestProp) ) {
+                                delete objInProp[nestProp.toString()];
+                            }
+                        });
+                    });
+                }
+            }
+        });
+
+        // Change some card Properties
+        card = changeProperties(card);
+
+        // Preprocessing complete for this card, add it to the final array
+        if ( filterAltArt(card.arena_Id, card.promo_types, card.set)) {
+            finalCards.push(card);
+        }
+
+        // end else (is an arena card and requires preprocessing)
         
     } catch (error) {
         console.log(`Unable to process: ${card.name}... Skipping`);
@@ -143,7 +189,7 @@ for ( let card of cards ) {
     // Check if the card has promo types
     if ( cardPromoTypes ) {
 
-        // TODO: For special sets this might not work (eg mystical archives)
+        // For special sets this might not work (eg mystical archives)
         // if the card doesn't have boosterfun in promo types --> keep it
         if ( cardPromoTypes.includes("boosterfun") === false ) {
 
