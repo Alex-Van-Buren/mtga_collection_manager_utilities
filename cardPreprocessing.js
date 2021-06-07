@@ -43,11 +43,11 @@ const addArenaIds = [
 const unwantedProperties = [
     "object", "id", "oracle_id", "multiverse_ids", "tcgplayer_id", "cardmarket_id", "lang", "released_at","uri", "scryfall_uri", 
     "highres_image", "games", "reserved", "foil", "nonfoil", "oversized", "promo", "reprint", "variation", "set_type", "set_uri",
-    "set_search_uri", "scryfall_set_uri", "rulings_uri","prints_search_uri", "collector_number", "digital", "card_back_id", "artist",
+    "set_search_uri", "scryfall_set_uri", "rulings_uri","prints_search_uri", "digital", "card_back_id", "artist",
     "artist_ids", "illustration_id", "border_color", "frame", "full_art", "textless", "story_spotlight", "edhrec_rank", "prices",
     "related_uris", "mtgo_id", "mtgo_foil_id", "all_parts", "watermark", "flavor_text", "image_status","preview", "produced_mana",
     "frame_effects", "set_name"
-]
+];
 
 /* Nested properties to remove from cards array
    - property is a specific property of a card that has some info to be kept
