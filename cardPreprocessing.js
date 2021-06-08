@@ -9,7 +9,7 @@
 const fs = require('fs'); // For writing a new file
 
 // Use most up-to-date Default Cards Bulk Data JSON from Scryfall
-const cards = require('./default-cards-20210604090309.json');
+const cards = require('./default-cards-20210608090316.json');
 
 const addArenaIds = [
     // {name: "Atarka's Command",              arena_id: 60959},
