@@ -152,7 +152,7 @@ for ( let card of cards ) {
         card = changeProperties(card);
 
         // Preprocessing complete for this card, add it to the final array
-        if ( filterAltArt(card.arena_Id, card.promo_types, card.set)) {
+        if ( filterAltArt(card.arena_id, card.promo_types, card.set)) {
             finalCards.push(card);
         }
 
