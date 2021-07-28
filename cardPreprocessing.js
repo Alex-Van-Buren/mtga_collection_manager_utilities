@@ -300,14 +300,13 @@ function changeProperties(card) {
     }
 
     // Lots of changes for set pana
-    if (card.set === 'pana') {
-        // check if the card is in the change cards object
-        if ( changeCards[card.arena_id] ) {
+    // check if the card is in the change cards object
+    if ( changeCards[card.arena_id] ) {
 
-            // change the properties
-            card.set = changeCards[card.arena_id].set;
-            card.collector_number = changeCards[card.arena_id].collector_number;
-        }
+        // change the properties
+        for (let [key, value] of Object.entries(changeCards[card.arena_id])) {
+            card[key] = value;
+        } 
     }
     return card;
 }
