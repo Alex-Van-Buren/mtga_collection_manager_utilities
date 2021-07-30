@@ -101,6 +101,12 @@ for ( let card of cards ) {
             continue;
         }
 
+        // Remove tokens
+        if ( card.hasOwnProperty('layout') && card.layout === 'token' ) {
+            // Don't add this card
+            continue;
+        }
+
         // Try to remove properties listed in unwantedProperties array
         unwantedProperties.forEach( prop => {
 
@@ -176,7 +182,7 @@ for ( let card of cards ) {
     // Problem cards that require a special filter
     // Realmwalker and Orah buy-a-box promos that also appear in the regular set
     // Special alt art of Reflections of Littjara doesn't appear in-game but has arena_id for some reason
-    if (cardId === 75382 || cardId === 75910 || cardId === 75381) {
+    if (cardId === 75382 || cardId === 75910 || cardId === 75381 || cardId === 77382) {
         // Don't add
         return false;
     }
