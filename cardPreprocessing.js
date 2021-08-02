@@ -102,7 +102,7 @@ for ( let card of cards ) {
         }
 
         // Remove tokens
-        if ( card.hasOwnProperty('layout') && card.layout === 'token' ) {
+        if ( (card.hasOwnProperty('layout') && card.layout === 'token') || ( card.set_type && card.set_type === 'token' )) {
             // Don't add this card
             continue;
         }
