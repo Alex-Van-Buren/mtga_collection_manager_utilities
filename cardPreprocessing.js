@@ -9,34 +9,42 @@
 const fs = require('fs'); // For writing a new file
 
 // Use most up-to-date Default Cards Bulk Data JSON from Scryfall
-const cards = require('./default-cards-20210728090316.json');
+const cards = require('./default-cards-20210828210239.json');
 
+const addSetCode = "j21";
 const addArenaIds = [
-    // {name: "Atarka's Command",              arena_id: 60959},
-    // {name: "Ancient Grudge",                arena_id: 42618},
-    // {name: "Court Homunculus",              arena_id: 46873},
-    // {name: "Dromoka's Command",             arena_id: 60975},
-    // {name: "Dragonstorm",                   arena_id: 18892},
-    // {name: "Elesh Norn, Grand Cenobite",    arena_id: 50871},
-    // {name: "Grisly Salvage",                arena_id: 51619},
-    // {name: "Into the North",                arena_id: 24649},
-    // {name: "Intangible Virtue",             arena_id: 42684},
-    // {name: "Ichor Wellspring",              arena_id: 39339},
-    // {name: "Jin-Gitaxias, Core Augur",      arena_id: 50873},
-    // {name: "Kolaghan's Command",            arena_id: 60981},
-    // {name: "Merfolk Looter",                arena_id: 32925},
-    // {name: "Ojutai's Command",              arena_id: 60987},
-    // {name: "Reverse Engineer",              arena_id: 64261},
-    // {name: "Relic of Progenitus",           arena_id: 30895},
-    // {name: "Ray of Revelation",             arena_id: 43257},
-    // {name: "Stifle",                        arena_id: 18902},
-    // {name: "Silumgar's Command",            arena_id: 60997},
-    // {name: "Sheoldred, Whispering One",     arena_id: 50875},
-    // {name: "Trash for Treasure",            arena_id: 78136},
-    // {name: "Urabrask the Hidden",           arena_id: 39738},
-    // {name: "Vault Skirge",                  arena_id: 39770},
-    // {name: "Vorinclex, Voice of Hunger",    arena_id: 50879},
-    // {name: "Whirler Rogue",                 arena_id: 61231}
+    // { name: "", arena_id:  }, // Template
+    { name: "Baffling Defenses", arena_id: 79360 },
+    { name: "Benalish Partisan", arena_id: 79361 },
+    { name: "Leonin Sanctifier", arena_id: 79362 },
+    { name: "Lumbering Lightshield", arena_id: 79363 },
+    { name: "Teyo, Aegis Adept", arena_id: 79364 },
+    { name: "Wingsteed Trainer", arena_id: 79365 },
+    { name: "Bounty of the Deep", arena_id: 79366 },
+    { name: "Ethereal Grasp", arena_id: 79367 },
+    { name: "Kiora, the Tide's Fury", arena_id: 79368 },
+    { name: "Mentor of Evos Isle", arena_id: 79369 },
+    { name: "Shoreline Scout", arena_id: 79370 },
+    { name: "Tome of the Infinite", arena_id: 79371 },
+    { name: "Boneyard Aberration", arena_id: 79372 },
+    { name: "Davriel, Soul Broker", arena_id: 79373 },
+    { name: "Davriel's Withering", arena_id: 79374 },
+    { name: "Manor Guardian", arena_id: 79375 },
+    { name: "Plaguecrafter's Familiar", arena_id: 79376 },
+    { name: "Subversive Acolyte", arena_id: 79377 },
+    { name: "Managorger Phoenix", arena_id: 79378 },
+    { name: "Reckless Ringleader", arena_id: 79379 },
+    { name: "Sarkhan's Scorn", arena_id: 79381 },
+    { name: "Sarkhan, Wanderer to Shiv", arena_id: 79380 },
+    { name: "Scion of Shiv", arena_id: 79382 },
+    { name: "Static Discharge", arena_id: 79383 },
+    { name: "Freyalise, Skyshroud Partisan", arena_id: 79384 },
+    { name: "Longtusk Stalker", arena_id: 79385 },
+    { name: "Pool of Vigorous Growth", arena_id: 79386 },
+    { name: "Skyshroud Ambush", arena_id: 79387 },
+    { name: "Skyshroud Lookout", arena_id: 79388 },
+    { name: "Veteran Charger", arena_id: 79389 },
+    { name: "Faceless Agent", arena_id: 79359 },
 ];
 
 // Properties to remove from cards array
@@ -74,7 +82,7 @@ for ( let card of cards ) {
         if (!card.hasOwnProperty("arena_id")) {
 
             // Check if this card belongs to a set that we need to add arena_id's to
-            if (card.set === "ha5") {
+            if (card.set === addSetCode) {
 
                 // Loop through the set we need to add arena_id's for
                 for (const matchCard of addArenaIds) {
