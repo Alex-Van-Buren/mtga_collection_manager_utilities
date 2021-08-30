@@ -9,42 +9,29 @@
 const fs = require('fs'); // For writing a new file
 
 // Use most up-to-date Default Cards Bulk Data JSON from Scryfall
-const cards = require('./default-cards-20210828210239.json');
+const cards = require('./default-cards-20210830090230.json');
 
 const addSetCode = "j21";
 const addArenaIds = [
     // { name: "", arena_id:  }, // Template
-    { name: "Baffling Defenses", arena_id: 79360 },
-    { name: "Benalish Partisan", arena_id: 79361 },
-    { name: "Leonin Sanctifier", arena_id: 79362 },
-    { name: "Lumbering Lightshield", arena_id: 79363 },
-    { name: "Teyo, Aegis Adept", arena_id: 79364 },
-    { name: "Wingsteed Trainer", arena_id: 79365 },
-    { name: "Bounty of the Deep", arena_id: 79366 },
-    { name: "Ethereal Grasp", arena_id: 79367 },
-    { name: "Kiora, the Tide's Fury", arena_id: 79368 },
-    { name: "Mentor of Evos Isle", arena_id: 79369 },
-    { name: "Shoreline Scout", arena_id: 79370 },
-    { name: "Tome of the Infinite", arena_id: 79371 },
-    { name: "Boneyard Aberration", arena_id: 79372 },
-    { name: "Davriel, Soul Broker", arena_id: 79373 },
-    { name: "Davriel's Withering", arena_id: 79374 },
-    { name: "Manor Guardian", arena_id: 79375 },
-    { name: "Plaguecrafter's Familiar", arena_id: 79376 },
-    { name: "Subversive Acolyte", arena_id: 79377 },
-    { name: "Managorger Phoenix", arena_id: 79378 },
-    { name: "Reckless Ringleader", arena_id: 79379 },
-    { name: "Sarkhan's Scorn", arena_id: 79381 },
-    { name: "Sarkhan, Wanderer to Shiv", arena_id: 79380 },
-    { name: "Scion of Shiv", arena_id: 79382 },
-    { name: "Static Discharge", arena_id: 79383 },
-    { name: "Freyalise, Skyshroud Partisan", arena_id: 79384 },
-    { name: "Longtusk Stalker", arena_id: 79385 },
-    { name: "Pool of Vigorous Growth", arena_id: 79386 },
-    { name: "Skyshroud Ambush", arena_id: 79387 },
-    { name: "Skyshroud Lookout", arena_id: 79388 },
-    { name: "Veteran Charger", arena_id: 79389 },
-    { name: "Faceless Agent", arena_id: 79359 },
+];
+const addSetExceptions = [
+    "Lightning Bolt",
+    "Duress",
+    "Fog",
+    "Giant Growth",
+    "Kraken Hatchling",
+    "Light of Hope",
+    "Ponder",
+    "Regal Force",
+    "Reassembling Skeleton",
+    "Dark Ritual",
+    "Shivan Dragon",
+    "Stormfront Pegasus",
+    "Force Spike",
+    "Swords to Plowshares",
+    "Assault Strobe",
+    "Tropical Island",
 ];
 
 // Properties to remove from cards array
@@ -81,7 +68,7 @@ for ( let card of cards ) {
         // Don't add cards to the finalCards array that don't have an arena ID (unless they're in a set we need to add arena_id's to)
         if (!card.hasOwnProperty("arena_id")) {
 
-            // Check if this card belongs to a set that we need to add arena_id's to
+            // Add specific sets without arena_ids
             if (card.set === addSetCode) {
 
                 // Loop through the set we need to add arena_id's for
@@ -92,6 +79,11 @@ for ( let card of cards ) {
                         card.arena_id = matchCard.arena_id;
                         break; // Stop this loop through this set, card has arena_id added
                     }
+                }
+
+                // Don't add these cards
+                if (addSetExceptions.includes(card.name)) {
+                    continue;
                 }
             }
 
