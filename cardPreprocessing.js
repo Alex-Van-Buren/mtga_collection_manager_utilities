@@ -11,7 +11,7 @@ const fs = require('fs'); // For writing a new file
 // Use most up-to-date Default Cards Bulk Data JSON from Scryfall
 const cards = require('./default-cards-20210830090230.json');
 
-const addSetCode = "j21";
+const setExceptions = ["j21"];
 const addArenaIds = [
     // { name: "", arena_id:  }, // Template
 ];
@@ -34,138 +34,200 @@ const addSetExceptions = [
     "Tropical Island",
 ];
 
-// Properties to remove from cards array
-const unwantedProperties = [
-    "object", "id", "oracle_id", "multiverse_ids", "tcgplayer_id", "cardmarket_id", "lang", "released_at","uri", "scryfall_uri", 
-    "highres_image", "games", "reserved", "foil", "nonfoil", "oversized", "promo", "reprint", "variation", "set_type", "set_uri",
-    "set_search_uri", "scryfall_set_uri", "rulings_uri","prints_search_uri", "digital", "card_back_id", "artist",
-    "artist_ids", "illustration_id", "border_color", "frame", "full_art", "textless", "story_spotlight", "edhrec_rank", "prices",
-    "related_uris", "mtgo_id", "mtgo_foil_id", "all_parts", "watermark", "flavor_text", "image_status","preview", "produced_mana",
-    "frame_effects", "set_name"
+// card.layout = "split", but img doesn't show text. Contains objects with "arenaId"s and "img"s in an array
+// Find cards with the same ids that are split cards and replace their images
+const replacementImages = require('./replacementImages.json');
+const extraReplacements = [
+    {
+        name: 'Fast // Furious',
+        set: 'j21',
+        img: 'https://c1.scryfall.com/file/scryfall-cards/border_crop/front/5/b/5b209759-6215-49e8-a6a0-a6c94040adb2.jpg?1629231952'     
+    },
 ];
 
-/* Nested properties to remove from cards array
-   - property is a specific property of a card that has some info to be kept
-   - nestedObject and nestedArray both refer to arrays of nested properties to be removed
-     * nestedObject is used if the structure of the property is 'property -> object -> properties'
-     * nestedArray is used if the structure of the property is 'property -> array -> object -> properties' */
-const nestedProperties = [
-    {   property: "image_uris",
-        nestedObject: ["small", "normal", "large", "png", "art_crop"]},
-    {   property: "legalities",
-        nestedObject: ["future", "gladiator", "modern", "legacy", "pauper", "vintage", "penny", "commander", "duel", "oldschool", "premodern" ]},
-    {   property: "card_faces",
-        nestedArray: ["object", "watermark", "artist", "artist_id", "illustration_id", "flavor_text"]}
-]
+// Properties to keep from cards array
+const desiredProperties = [
+    'name',
+    'color_identity',
+    'cmc',
+    'set',
+    'rarity',
+    'type_line',
+    'oracle_text',
+    'layout',
+    'keywords',
+    'collector_number',
+    'booster',
+    'promo_types',
+    'printed_name',
+    // 'arena_id', // Special case - renamed to arenaId
+    // 'legalities', // Special case - nested
+    // 'card_faces', // Special case - nested
+    // 'image_uris', // Swapping to imgs: {front, back}
+    // 'power', // Not currently used
+    // 'toughness', // Not currently used
+    // 'loyalty', // Not currently used
+];
+
+const desiredLegalities = [
+    'standard',
+    'historic',
+    'brawl',
+    'historicbrawl',
+    'future',
+    // 'pioneer', // Not currently used
+];
+
+const desiredCardFaceProps = [
+    'name',
+    'oracle_text',
+];
 
 // An array that will hold cards after preprocessing
-let finalCards = [];
+const returnCards = [];
 
 // Preprocess cards, removing all without an arena id, and removing undesired properties
 for ( let card of cards ) {
 
     try {
-        // Don't add cards to the finalCards array that don't have an arena ID (unless they're in a set we need to add arena_id's to)
-        if (!card.hasOwnProperty("arena_id")) {
 
-            // Add specific sets without arena_ids
-            if (card.set === addSetCode) {
+        /* 
+         * Test if card is in MTG Arena
+         */
+        {
+            // Don't add cards to the returnCards array that don't have an arena ID (unless there are specific exceptions)
+            if (!card.hasOwnProperty("arena_id")) {
 
-                // Loop through the set we need to add arena_id's for
-                for (const matchCard of addArenaIds) {
+                // Add cards from specific sets
+                if (setExceptions.includes(card.set)) {
 
-                    // Add the arena_id if the card names match
-                    if (card.name === matchCard.name) {
-                        card.arena_id = matchCard.arena_id;
-                        break; // Stop this loop through this set, card has arena_id added
+                    // Add arenaIds for specified cards
+                    for (const matchCard of addArenaIds) {
+
+                        // Add the arena_id if the card names match
+                        if (card.name === matchCard.name) {
+                            card.arena_id = matchCard.arena_id;
+                            break; // Stop this loop through this set, card has arena_id added
+                        }
+                    }
+
+                    // Except these cards
+                    if (addSetExceptions.includes(card.name)) {
+                        continue;
                     }
                 }
 
-                // Don't add these cards
-                if (addSetExceptions.includes(card.name)) {
+                // Do nothing, move onto the next card; card isn't an arena card
+                else {
                     continue;
                 }
             }
 
-            // Do nothing, move onto the next card; card isn't added to final card array
-            else {
+            // Remove cards that have an arena_id but are not in english
+            if ( card.lang && card.lang !== "en") {
+                // go on to next card and do not add this card to the returnCards array
+                continue;
+            }
+
+            // Remove tokens
+            if ( (card.layout && card.layout === 'token') || ( card.set_type && card.set_type === 'token' )) {
+                // Don't add this card
+                continue;
+            }
+
+            // Test if card is an alternate art card that is not desired
+            if (!filterAltArt(card.arena_id, card.promo_types, card.set)) {
                 continue;
             }
         }
 
-        /* Card is an arena card, requires preprocessing */
+        /* 
+         * Card has passed all tests and should be added to arenaCards.json
+         * Create new card, get all desired properties, and add it to the returnCards array
+         */
+        {
+            const newCard = {};
 
-        // Remove cards that have an arena_id but are not in english
-        if ( card.hasOwnProperty('lang') && card.lang !== "en") {
-            // go on to next card and do not add this card to the finalCards array
-            continue;
-        }
-
-        // Remove tokens
-        if ( (card.hasOwnProperty('layout') && card.layout === 'token') || ( card.set_type && card.set_type === 'token' )) {
-            // Don't add this card
-            continue;
-        }
-
-        // Try to remove properties listed in unwantedProperties array
-        unwantedProperties.forEach( prop => {
-
-            if (card.hasOwnProperty(prop))
-                delete card[prop];
-        });
-        
-        // Some properties contain objects or arrays, and we only want to keep some of those values
-        //  therefore check for those values listed in nestedProperties
-        nestedProperties.forEach( npObject => {
-
-            // Case 1: nestedProperties object has a nestedObject value
-            //  therefore: structured as, 'property -> object -> properties'
-            if (npObject.hasOwnProperty("nestedObject")) {
-
-                // Try to remove all values listed in nestedObject
-                npObject.nestedObject.forEach( nestProp => {
-
-                    // ...if both the property and nested property exist for the card
-                    if ( card.hasOwnProperty(npObject.property) && card[npObject.property].hasOwnProperty(nestProp))
-                        delete card[npObject.property][nestProp];
-                });
+            // Add arenaId to cards
+            if (card.arena_id) { // Need to check "if" for the specific exception cases above
+                newCard.arenaId = card.arena_id;
             }
-            // Case 2: nestedProperties object has a nestedArray value
-            //  therefore structured as, 'property -> array -> object -> properties'
-            else if (npObject.hasOwnProperty("nestedArray")) {
 
-                // Check if the card has the property listed in the nestedProperties array (e.g. card_faces)
-                if (card.hasOwnProperty(npObject.property)) {
-
-                    // Loop through each object nested within a property of the card, call this objInProp
-                    card[npObject.property].forEach( objInProp => {
-                        const index = objInProp.index;
-
-                        // Loop through each of the properties that we want to remove (from nestedProperties.nestedArray)
-                        npObject.nestedArray.forEach(nestProp => {
-
-                            // Check if that property exists within the card and remove it if it does
-                            if ( objInProp.hasOwnProperty(nestProp) ) {
-                                delete objInProp[nestProp.toString()];
-                            }
-                        });
-                    });
+            // Add desired properties to newCard
+            for (const prop of desiredProperties) {
+                if (card[prop]) {
+                    newCard[prop] = card[prop];
                 }
             }
-        });
 
-        // Change some card Properties
-        card = changeProperties(card);
+            // Add imgs to card
+            if (card.image_uris) {
+                newCard.imgs = { front: card.image_uris.border_crop };
+            }
 
-        // Preprocessing complete for this card, add it to the final array
-        if ( filterAltArt(card.arena_id, card.promo_types, card.set)) {
-            finalCards.push(card);
+            // Add desired legalities
+            newCard.legalities = {};
+            for (const legality of desiredLegalities) {
+                if (card.legalities[legality]) {
+                    newCard.legalities[legality] = card.legalities[legality];
+                }
+            }
+
+            // 2-sided cards
+            if (card.card_faces) {
+
+                // Some cards don't have a card.image_uris property, so need to add front image from card_faces
+                if (!newCard.imgs) {
+                    newCard.imgs = { front: card.card_faces[0].image_uris.border_crop };
+                }
+
+                // Add backside image
+                if (card.card_faces[1].image_uris) {
+                    newCard.imgs.back = card.card_faces[1].image_uris.border_crop;
+                }
+
+                // Add card_faces if applicable
+                if (card.card_faces) {
+                    newCard.card_faces = [];
+
+                    // Add specific props to 2-sided cards
+                    for (const prop of desiredCardFaceProps) {
+                        for (let i=0; i<card.card_faces.length; i++) {
+                            if (!newCard.card_faces[i]) {
+                                newCard.card_faces[i] = {};
+                            }
+                            if (card.card_faces[i][prop]) {
+                                newCard.card_faces[i][prop] = card.card_faces[i][prop];
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Replace some card images
+            for (const replaceCard of replacementImages) {
+                if (replaceCard.arenaId === card.arena_id) {
+                    newCard.imgs.front = replaceCard.img;
+                    break;
+                }
+            }
+
+            // Extra replacements without arena IDs
+            for (const replaceCard of extraReplacements) {
+                if (replaceCard.name === card.name && replaceCard.set === card.set) {
+                    newCard.imgs.front = replaceCard.img;
+                }
+            }
+
+            // Change some card Properties
+            changeProperties(newCard);
+
+            // Preprocessing complete for this card, add it to the final array
+            returnCards.push(newCard);
         }
-
-        // end else (is an arena card and requires preprocessing)
         
     } catch (error) {
-        console.log(`Unable to process: ${card.name}... Skipping`);
+        console.log(`Unable to process: ${card.name? card.name : card}... Skipping`);
         console.log(error);
     }
 } // end for cards
@@ -307,14 +369,13 @@ function changeProperties(card) {
 
     // Lots of changes for set pana
     // check if the card is in the change cards object
-    if ( changeCards[card.arena_id] ) {
+    if ( changeCards[card.arenaId] ) {
 
         // change the properties
-        for (let [key, value] of Object.entries(changeCards[card.arena_id])) {
+        for (let [key, value] of Object.entries(changeCards[card.arenaId])) {
             card[key] = value;
-        } 
+        }
     }
-    return card;
 }
 /* Format file name as 'arenaCards' + (current data and time) + '.json'
    - (current data and time) formatted as 'YYYYMMDD' + UTC (without spaces or separators)
@@ -322,4 +383,4 @@ function changeProperties(card) {
 const fileName = `./arenaCards${new Date().toISOString().replace(/\..+/g, "").replace(/[T:\-]/g, "")}.json`;
 
 // Write to file
-fs.writeFileSync(fileName, JSON.stringify(finalCards));
+fs.writeFileSync(fileName, JSON.stringify(returnCards));
