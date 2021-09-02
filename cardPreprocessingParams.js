@@ -38,8 +38,7 @@ const addSetExceptions = [
 
 /** Split cards that require their image be replaced (like in the akr set) because their pictures don't
  *  show oracle_text.
- *  An array of objects: [{ arenaId: XXXX, img: "https://c1.scryfall.com/..." }, ...]
- */
+ *  An array of objects: [{ arenaId: XXXX, img: "https://c1.scryfall.com/..." }, ...] */
 const replacementImages = require('./replacementImages.json');
 
 /** Cards that don't have arena_ids, but require replacement images.
@@ -93,6 +92,80 @@ const desiredCardFaceProps = [
     'oracle_text',
 ];
 
+/** Object of arena_ids that specify card properties that need to be corrected.
+ *  Used internally; not exported. */
+const changeCards = {
+    // Brawl exclusives
+    29535: {set: 'shm' , collector_number: 237 },
+    49077: {set: 'm13' , collector_number: 72 },
+    63081: {set: 'soi' , collector_number: 245 },
+    18674: {set: 'scg' , collector_number: 136 },
+    48499: {set: 'inv' , collector_number: 249 },
+
+    // BFZ lands
+    62115: {set: 'bfz' , collector_number: 250 },
+    62125: {set: 'bfz' , collector_number: 255 },
+    62135: {set: 'bfz' , collector_number: 260 },
+    62145: {set: 'bfz' , collector_number: 265 },
+    62155: {set: 'bfz' , collector_number: 270 },
+
+    // RTR lands
+    51789: {set: 'rtr' , collector_number: 250 },
+    //! 62125: {set: 'rtr' , collector_number: 255 },  Island is missing for some reason  ARENA_ID WRONG
+    51809: {set: 'rtr' , collector_number: 260 },
+    51819: {set: 'rtr' , collector_number: 265 },
+    51829: {set: 'rtr' , collector_number: 270 },
+
+    // AKH lands
+    65363: {set: 'akh' , collector_number: 256 },
+    65369: {set: 'akh' , collector_number: 258 },
+    65379: {set: 'akh' , collector_number: 262 },
+    65385: {set: 'akh' , collector_number: 264 },
+    65393: {set: 'akh' , collector_number: 267 },
+
+    // MIR lands
+    7193: {set: 'mir' , collector_number: 331 },
+    7065: {set: 'mir' , collector_number: 336 },
+    7347: {set: 'mir' , collector_number: 340 },
+    7153: {set: 'mir' , collector_number: 346 },
+    6993: {set: 'mir' , collector_number: 347 },
+
+    // ROE lands
+    36786: {set: 'roe' , collector_number: 229 },
+    36818: {set: 'roe' , collector_number: 235 },
+    36812: {set: 'roe' , collector_number: 237 },
+    36788: {set: 'roe' , collector_number: 242 },
+    36802: {set: 'roe' , collector_number: 245 },
+
+    // UND lands
+    73136: {set: 'und' , collector_number: 87 },
+    73137: {set: 'und' , collector_number: 89 },
+    73138: {set: 'und' , collector_number: 91 },
+    73139: {set: 'und' , collector_number: 93 },
+    // !73140: {set: 'und' , collector_number: 95 }, Forest is missing for some reason ARENA_ID IS WRONG, collector number wrong too
+
+    // UND full art lands
+    73141: {set: 'und' , collector_number: 88 },
+    73142: {set: 'und' , collector_number: 90 },
+    73143: {set: 'und' , collector_number: 92 },
+    73144: {set: 'und' , collector_number: 94 },
+    // !73145: {set: 'und' , collector_number: 96 }, Overlapping issue with UND forest
+
+    // Godzilla lands sld
+    73644: {set: 'sld' , collector_number: 63 },
+    73645: {set: 'sld' , collector_number: 64 },
+    73646: {set: 'sld' , collector_number: 65 },
+    73647: {set: 'sld' , collector_number: 66 },
+    73648: {set: 'sld' , collector_number: 67 },
+
+    // UST full art John Avon lands
+    75021: {set: 'ust' , collector_number: 212 },
+    75022: {set: 'ust' , collector_number: 213 },
+    75023: {set: 'ust' , collector_number: 214 },
+    75024: {set: 'ust' , collector_number: 215 },
+    75025: {set: 'ust' , collector_number: 216 }
+};
+
 /**
  * Filter out alternate art and problem cards.
  * @param {number} cardId ID of the card.
@@ -139,83 +212,11 @@ const desiredCardFaceProps = [
 
 /**
  * Some cards have properties that are difficult to work with or are not correct for our purposes.
- * This function changes them
+ * This function changes them.
  * @param {Object} card Card object
  * @returns Card with properties altered if they needed to be changed
  */
 function changeProperties(card) {
-    // Object wehre keys are arena_ids with properties to check and the value is an object with the new properties
-    const changeCards = {
-        // Brawl exclusives
-        29535: {set: 'shm' , collector_number: 237 },
-        49077: {set: 'm13' , collector_number: 72 },
-        63081: {set: 'soi' , collector_number: 245 },
-        18674: {set: 'scg' , collector_number: 136 },
-        48499: {set: 'inv' , collector_number: 249 },
-
-        // BFZ lands
-        62115: {set: 'bfz' , collector_number: 250 },
-        62125: {set: 'bfz' , collector_number: 255 },
-        62135: {set: 'bfz' , collector_number: 260 },
-        62145: {set: 'bfz' , collector_number: 265 },
-        62155: {set: 'bfz' , collector_number: 270 },
-
-        // RTR lands
-        51789: {set: 'rtr' , collector_number: 250 },
-        //! 62125: {set: 'rtr' , collector_number: 255 },  Island is missing for some reason  ARENA_ID WRONG
-        51809: {set: 'rtr' , collector_number: 260 },
-        51819: {set: 'rtr' , collector_number: 265 },
-        51829: {set: 'rtr' , collector_number: 270 },
-
-        // AKH lands
-        65363: {set: 'akh' , collector_number: 256 },
-        65369: {set: 'akh' , collector_number: 258 },
-        65379: {set: 'akh' , collector_number: 262 },
-        65385: {set: 'akh' , collector_number: 264 },
-        65393: {set: 'akh' , collector_number: 267 },
-
-        // MIR lands
-        7193: {set: 'mir' , collector_number: 331 },
-        7065: {set: 'mir' , collector_number: 336 },
-        7347: {set: 'mir' , collector_number: 340 },
-        7153: {set: 'mir' , collector_number: 346 },
-        6993: {set: 'mir' , collector_number: 347 },
-
-        // ROE lands
-        36786: {set: 'roe' , collector_number: 229 },
-        36818: {set: 'roe' , collector_number: 235 },
-        36812: {set: 'roe' , collector_number: 237 },
-        36788: {set: 'roe' , collector_number: 242 },
-        36802: {set: 'roe' , collector_number: 245 },
-
-        // UND lands
-        73136: {set: 'und' , collector_number: 87 },
-        73137: {set: 'und' , collector_number: 89 },
-        73138: {set: 'und' , collector_number: 91 },
-        73139: {set: 'und' , collector_number: 93 },
-        // !73140: {set: 'und' , collector_number: 95 }, Forest is missing for some reason ARENA_ID IS WRONG, collector number wrong too
-
-        // UND full art lands
-        73141: {set: 'und' , collector_number: 88 },
-        73142: {set: 'und' , collector_number: 90 },
-        73143: {set: 'und' , collector_number: 92 },
-        73144: {set: 'und' , collector_number: 94 },
-        // !73145: {set: 'und' , collector_number: 96 }, Overlapping issue with UND forest
-
-        // Godzilla lands sld
-        73644: {set: 'sld' , collector_number: 63 },
-        73645: {set: 'sld' , collector_number: 64 },
-        73646: {set: 'sld' , collector_number: 65 },
-        73647: {set: 'sld' , collector_number: 66 },
-        73648: {set: 'sld' , collector_number: 67 },
-
-        // UST full art John Avon lands
-        75021: {set: 'ust' , collector_number: 212 },
-        75022: {set: 'ust' , collector_number: 213 },
-        75023: {set: 'ust' , collector_number: 214 },
-        75024: {set: 'ust' , collector_number: 215 },
-        75025: {set: 'ust' , collector_number: 216 }
-    };
 
     // Change arena exclusive jumpstart cards to jumpstart and make booster true
     if (card.set === 'ajmp') {
