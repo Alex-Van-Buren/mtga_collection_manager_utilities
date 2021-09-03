@@ -134,7 +134,7 @@ for ( let card of cards ) {
 
             // Replace some card images
             for (const replaceCard of replacementImages) {
-                if (replaceCard.arenaId === card.arena_id) {
+                if (card.arena_id && replaceCard.arenaId === card.arena_id) {
                     newCard.imgs.front = replaceCard.img;
                     break;
                 }
