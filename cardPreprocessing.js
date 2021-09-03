@@ -77,13 +77,13 @@ for ( let card of cards ) {
             const newCard = {};
 
             // Add arenaId to cards
-            if (card.arena_id) { // Need to check "if" for the specific exception cases above
+            if (card.hasOwnProperty("arena_id")) { // Need to check "if" for the specific exception cases above
                 newCard.arenaId = card.arena_id;
             }
 
             // Add desired properties to newCard
             for (const prop of desiredProperties) {
-                if (card[prop]) {
+                if (card.hasOwnProperty(prop)) {
                     newCard[prop] = card[prop];
                 }
             }
