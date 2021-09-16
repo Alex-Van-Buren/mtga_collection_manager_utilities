@@ -1,7 +1,7 @@
 const fs = require('fs'); // For writing a new file
 
 const { 
-    cards, addArenaId, setExceptions, addSetExceptions, replacementImages, extraReplacements, 
+    cards, addArenaId, setExceptions, replacementImages, extraReplacements, 
     desiredProperties, desiredLegalities, desiredCardFaceProps, filterAltArt, changeProperties
 } = require('./cardPreprocessingParams'); // Parameters describing source data, exceptions, exclusions, etc.
 
@@ -27,13 +27,15 @@ for ( let card of cards ) {
             if (!card.hasOwnProperty("arena_id")) {
 
                 // Add cards from specific sets
-                if (setExceptions.includes(card.set)) {
+                if (Object.keys(setExceptions).includes(card.set)) {
 
                     addArenaId(card);
 
                     // Except these cards
-                    if (addSetExceptions.includes(card.name)) {
-                        continue;
+                    if (setExceptions.hasOwnProperty(card.set)) {
+                        if (setExceptions[card.set].includes(card.name)) {
+                            continue;
+                        }
                     }
                 }
 
@@ -56,7 +58,7 @@ for ( let card of cards ) {
             }
 
             // Test if card is an alternate art card that is not desired
-            if (!filterAltArt(card.arena_id, card.promo_types, card.set)) {
+            if (!filterAltArt(card.arena_id, card.promo_types, card.set, card.collector_number)) {
                 continue;
             }
         }

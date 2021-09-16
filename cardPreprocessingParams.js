@@ -3,7 +3,7 @@
  */
 
 /** The most up-to-date Default Cards Bulk Data JSON from Scryfall */
-const cards = require('./default-cards-20210915090226.json');
+const cards = require('./default-cards-20210916090244.json');
 
 /** Extracted Card Data from game files. Used for adding arenaIds because Scryfall is slow to add arena Ids*/
 const j21Cards = require('./extractedSetData/j21.json');
@@ -16,28 +16,34 @@ const extractedSetsData = j21Cards.concat(mh1Cards, mh2Cards);
 /** Extra cards that need to be filtered out via filterAltArt */
 const filterArtIDs = [ 75382, 75910, 75381, 77382 ]; // Not exported, used internally
 
-/** Card sets to include even if they don't have arena_ids */
-const setExceptions = ["j21", "mid"];
+/** Unwanted cards to filter out using set code and collector number */
+const filterArtCollector = {
+    mid: ['386', '385']
+}
 
-/** Cards that should be excluded even if they're from a set in setExceptions */
-const addSetExceptions = [
-    "Lightning Bolt",
-    "Duress",
-    "Fog",
-    "Giant Growth",
-    "Kraken Hatchling",
-    "Light of Hope",
-    "Ponder",
-    "Regal Force",
-    "Reassembling Skeleton",
-    "Dark Ritual",
-    "Shivan Dragon",
-    "Stormfront Pegasus",
-    "Force Spike",
-    "Swords to Plowshares",
-    "Assault Strobe",
-    "Tropical Island",
-];
+/** Card sets to include even if they don't have arena_ids */
+const setExceptions = {
+    "j21": [
+        "Lightning Bolt",
+        "Duress",
+        "Fog",
+        "Giant Growth",
+        "Kraken Hatchling",
+        "Light of Hope",
+        "Ponder",
+        "Regal Force",
+        "Reassembling Skeleton",
+        "Dark Ritual",
+        "Shivan Dragon",
+        "Stormfront Pegasus",
+        "Force Spike",
+        "Swords to Plowshares",
+        "Assault Strobe",
+        "Tropical Island",
+    ],
+    "mid": [
+
+    ]};
 
 /** Split cards that require their image be replaced (like in the akr set) because their pictures don't
  *  show oracle_text.
@@ -174,15 +180,20 @@ const changeCards = {
  * @param {number} cardId ID of the card.
  * @param {Array} cardPromoTypes 
  * @param {string} setId set code
+ * @param {number} collector_number collector number of the card
  * @returns True if the card is not an alternate art card, false otherwise.
  */
- function filterAltArt(cardId, cardPromoTypes, setId) {
+ function filterAltArt(cardId, cardPromoTypes, setId, collector_number) {
 
     // Problem cards that require a special filter
     // Realmwalker and Orah buy-a-box promos that also appear in the regular set
     // Special alt art of Reflections of Littjara doesn't appear in-game but has arena_id for some reason
     if (filterArtIDs.includes(cardId)) {
         // Don't add
+        return false;
+    }
+
+    if ( filterArtCollector[setId] &&  filterArtCollector[setId].includes(collector_number)) {
         return false;
     }
 
@@ -201,7 +212,7 @@ const changeCards = {
 
         // For special sets this might not work (eg mystical archives)
         // if the card doesn't have boosterfun in promo types --> keep it
-        if ( cardPromoTypes.includes("boosterfun") === false ) {
+        if ( !cardPromoTypes.includes("boosterfun") && !cardPromoTypes.includes('promopack') ) {
 
             return true
         }
@@ -306,7 +317,6 @@ module.exports = {
     cards,
     addArenaId,
     setExceptions,
-    addSetExceptions,
     replacementImages,
     extraReplacements,
     desiredProperties,
