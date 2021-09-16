@@ -3,18 +3,21 @@
  */
 
 /** The most up-to-date Default Cards Bulk Data JSON from Scryfall */
-const cards = require('./default-cards-20210830090230.json');
+const cards = require('./default-cards-20210915090226.json');
+
+/** Extracted Card Data from game files. Used for adding arenaIds because Scryfall is slow to add arena Ids*/
+const j21Cards = require('./extractedSetData/j21.json');
+const mh1Cards = require('./extractedSetData/mh1.json');
+const mh2Cards = require('./extractedSetData/mh2.json');
+
+// Combine all the extracted sets into one thing
+const extractedSetsData = j21Cards.concat(mh1Cards, mh2Cards);
 
 /** Extra cards that need to be filtered out via filterAltArt */
 const filterArtIDs = [ 75382, 75910, 75381, 77382 ]; // Not exported, used internally
 
-/** Cards that need an arena_id added to them. An array of objects with names and arena_ids 
- *  { name: "", arena_id:  }, // Template
- */
-const addArenaIds = [];
-
 /** Card sets to include even if they don't have arena_ids */
-const setExceptions = ["j21"];
+const setExceptions = ["j21", "mid"];
 
 /** Cards that should be excluded even if they're from a set in setExceptions */
 const addSetExceptions = [
@@ -240,9 +243,68 @@ function changeProperties(card) {
     }
 }
 
+/**
+ * Adds Arena Ids to cards using the extracted Set Data
+ * @param {*} card Card to add arenaId to
+ * @returns {boolean} true if arenaId was added, false if not
+ */
+function addArenaId(card) {
+    // J21 includes cards from j21(duh), mh1, and mh2
+    const combinedJ21 = j21Cards.concat(mh1Cards, mh2Cards);
+
+    // Special case
+    if (card.set === 'j21') {
+
+        // Loop through combined J21 data to find a match to card
+        for ( const checkCard of combinedJ21 ) {
+
+            // collector numbers are reused (inexplicably) and set is obviously different in mh1 and mh2 cases
+            // Fortunately name is a unique identifier in this case, in general case it is not
+            if ( checkCard.name === card.name ) {
+                // Add arena Id
+                card.arena_id = checkCard.arenaId;
+                return true;
+            } else if ( card.card_faces && card.card_faces[0].name === checkCard.name ){
+                card.arena_id = checkCard.arenaId;
+                return true;
+            }
+        }
+
+        // Loop terminated without finding a match --> No need to continue to general case
+        return false;
+    }
+
+    // General Case
+    // Loop over extracted data to find a match for the input card
+    for ( const checkCard of extractedSetsData ) {
+        
+        // Card matches if the name, collector number, and set match
+        if ( checkCard.name            === card.name && 
+            checkCard.collector_number === card.collector_number && 
+            checkCard.set              === card.set ) 
+        {
+
+            // Add the arenaId to card
+            card.arenaId = checkCard.arenaId;
+            return true;
+
+        } else if ( card.card_faces ) {
+            if ( checkCard.name            === card.card_faces[0].name && 
+                checkCard.collector_number === card.collector_number && 
+                checkCard.set              === card.set ) 
+            {
+                // Add the arenaId to card
+                card.arenaId = checkCard.arenaId;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 module.exports = {
     cards,
-    addArenaIds,
+    addArenaId,
     setExceptions,
     addSetExceptions,
     replacementImages,

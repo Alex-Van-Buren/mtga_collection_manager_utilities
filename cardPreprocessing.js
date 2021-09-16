@@ -1,7 +1,7 @@
 const fs = require('fs'); // For writing a new file
 
 const { 
-    cards, addArenaIds, setExceptions, addSetExceptions, replacementImages, extraReplacements, 
+    cards, addArenaId, setExceptions, addSetExceptions, replacementImages, extraReplacements, 
     desiredProperties, desiredLegalities, desiredCardFaceProps, filterAltArt, changeProperties
 } = require('./cardPreprocessingParams'); // Parameters describing source data, exceptions, exclusions, etc.
 
@@ -29,15 +29,7 @@ for ( let card of cards ) {
                 // Add cards from specific sets
                 if (setExceptions.includes(card.set)) {
 
-                    // Add arenaIds for specified cards
-                    for (const matchCard of addArenaIds) {
-
-                        // Add the arena_id if the card names match
-                        if (card.name === matchCard.name) {
-                            card.arena_id = matchCard.arena_id;
-                            break; // Stop this loop through this set, card has arena_id added
-                        }
-                    }
+                    addArenaId(card);
 
                     // Except these cards
                     if (addSetExceptions.includes(card.name)) {

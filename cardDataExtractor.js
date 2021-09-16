@@ -1,3 +1,9 @@
+/**
+ * File for extracting card info, particularly arena Ids, directly from the game files.
+ * Make sure the data_cards and data_loc files are up to date.
+ * Run with node cardDataExtractor. When prompted, enter set code for desired set.
+ * Writes JSON of cards in desired set if successful
+ */
 const prompt = require('prompt-sync')();
 const fs = require('fs');
 
