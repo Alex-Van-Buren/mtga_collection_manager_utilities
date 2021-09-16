@@ -1,0 +1,20 @@
+{
+  "name": "mtga_collection_manager_utilities",
+  "version": "3.0.0",
+  "description": "Utilities for Collection Manager",
+  "main": "cardPreprocessing.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node cardPreprocessing.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Alex-Van-Buren/mtga_collection_manager_utilities.git"
+  },
+  "author": "Nate and Alex",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Alex-Van-Buren/mtga_collection_manager_utilities/issues"
+  },
+  "homepage": "https://github.com/Alex-Van-Buren/mtga_collection_manager_utilities#readme"
+}
