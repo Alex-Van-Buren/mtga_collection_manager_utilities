@@ -11,8 +11,8 @@ const fs = require('fs');
 // path C:\Program Files\Wizards of the Coast\MTGA\MTGA_Data\Downloads\Data
 // Copy data_cards_**.mtga and data_loc_**.mtga
 // Change extension to .json
-const data_cards = require("./arenaCardDataFiles/data_cards_66bce04966e00a467c563fe13e5ce877.json");
-const data_loc = require("./arenaCardDataFiles/data_loc_b4731490543c3645e1044b8ec2b28d16.json");
+const data_cards = require("./arenaCardDataFiles/data_cards.json");
+const data_loc = require("./arenaCardDataFiles/data_loc.json");
 
 // Ask which set to extract cards for
 let set = prompt('Which set? ');
