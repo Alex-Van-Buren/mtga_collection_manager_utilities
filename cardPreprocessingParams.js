@@ -9,9 +9,10 @@ const cards = require('./default-cards-20210916090244.json');
 const j21Cards = require('./extractedSetData/j21.json');
 const mh1Cards = require('./extractedSetData/mh1.json');
 const mh2Cards = require('./extractedSetData/mh2.json');
+const midCards = require('./extractedSetData/mid.json');
 
 // Combine all the extracted sets into one thing
-const extractedSetsData = j21Cards.concat(mh1Cards, mh2Cards);
+const extractedSetsData = j21Cards.concat(mh1Cards, mh2Cards, midCards);
 
 /** Extra cards that need to be filtered out via filterAltArt */
 const filterArtIDs = [ 75382, 75910, 75381, 77382 ]; // Not exported, used internally
@@ -296,7 +297,7 @@ function addArenaId(card) {
         {
 
             // Add the arenaId to card
-            card.arenaId = checkCard.arenaId;
+            card.arena_id = checkCard.arenaId;
             return true;
 
         } else if ( card.card_faces ) {
@@ -305,7 +306,7 @@ function addArenaId(card) {
                 checkCard.set              === card.set ) 
             {
                 // Add the arenaId to card
-                card.arenaId = checkCard.arenaId;
+                card.arena_id = checkCard.arenaId;
                 return true;
             }
         }
