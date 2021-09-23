@@ -23,26 +23,26 @@ for ( let card of cards ) {
          * Test if card is in MTG Arena
          */
         {
-            // Don't add cards to the returnCards array that don't have an arena ID (unless there are specific exceptions)
-            if (!card.hasOwnProperty("arena_id")) {
+            // Add/replace arena ids to certain sets cards
+            if (Object.keys(setExceptions).includes(card.set)) {
 
-                // Add cards from specific sets
-                if (Object.keys(setExceptions).includes(card.set)) {
-
-                    addArenaId(card);
-
-                    // Except these cards
-                    if (setExceptions.hasOwnProperty(card.set)) {
-                        if (setExceptions[card.set].includes(card.name)) {
-                            continue;
-                        }
-                    }
-                }
-
-                // Do nothing, move onto the next card; card isn't an arena card
-                else {
+                // If add arenaId fails to add the arenaId to the card, then skip this card
+                if(!addArenaId(card)){
                     continue;
                 }
+
+                // Except these cards
+                if (setExceptions.hasOwnProperty(card.set)) {
+                    if (setExceptions[card.set].includes(card.name)) {
+                        continue;
+                    }
+                }
+            }
+            // Don't add cards to the returnCards array that don't have an arena ID 
+            if (!card.hasOwnProperty("arena_id")) {
+
+                // Do nothing, move onto the next card; card isn't an arena card
+                continue;
             }
 
             // Remove cards that have an arena_id but are not in english

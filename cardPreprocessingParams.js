@@ -3,23 +3,25 @@
  */
 
 /** The most up-to-date Default Cards Bulk Data JSON from Scryfall */
-const cards = require('./default-cards-20210916090244.json');
+const cards = require('./default-cards-20210922090240.json');
 
 /** Extracted Card Data from game files. Used for adding arenaIds because Scryfall is slow to add arena Ids*/
 const j21Cards = require('./extractedSetData/j21.json');
 const mh1Cards = require('./extractedSetData/mh1.json');
 const mh2Cards = require('./extractedSetData/mh2.json');
 const midCards = require('./extractedSetData/mid.json');
+const anaCards = require('./extractedSetData/ana.json');
 
 // Combine all the extracted sets into one thing
-const extractedSetsData = j21Cards.concat(mh1Cards, mh2Cards, midCards);
+const extractedSetsData = j21Cards.concat(mh1Cards, mh2Cards, midCards, anaCards);
 
 /** Extra cards that need to be filtered out via filterAltArt */
 const filterArtIDs = [ 75382, 75910, 75381, 77382 ]; // Not exported, used internally
 
 /** Unwanted cards to filter out using set code and collector number */
 const filterArtCollector = {
-    mid: ['386', '385']
+    mid: ['386', '385'], 
+    pana: ['249', '252', '253', '248', '250', '251', '255', '254', '247', '246'] // Duplicate basic land arts
 }
 
 /** Card sets to include even if they don't have arena_ids */
@@ -44,7 +46,11 @@ const setExceptions = {
     ],
     "mid": [
 
-    ]};
+    ], 
+    'ana': [
+
+    ],
+};
 
 /** Split cards that require their image be replaced (like in the akr set) because their pictures don't
  *  show oracle_text.
