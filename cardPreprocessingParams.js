@@ -3,7 +3,7 @@
  */
 
 /** The most up-to-date Default Cards Bulk Data JSON from Scryfall */
-const cards = require('./default-cards-20210922090240.json');
+const cards = require('./default-cards-20211111220310.json');
 
 /** Extracted Card Data from game files. Used for adding arenaIds because Scryfall is slow to add arena Ids*/
 const j21Cards = require('./extractedSetData/j21.json');
@@ -11,9 +11,10 @@ const mh1Cards = require('./extractedSetData/mh1.json');
 const mh2Cards = require('./extractedSetData/mh2.json');
 const midCards = require('./extractedSetData/mid.json');
 const anaCards = require('./extractedSetData/ana.json');
+const vowCards = require('./extractedSetData/vow.json');
 
 // Combine all the extracted sets into one thing
-const extractedSetsData = j21Cards.concat(mh1Cards, mh2Cards, midCards, anaCards);
+const extractedSetsData = j21Cards.concat(mh1Cards, mh2Cards, midCards, anaCards, vowCards);
 
 /** Extra cards that need to be filtered out via filterAltArt */
 const filterArtIDs = [ 75382, 75910, 75381, 77382 ]; // Not exported, used internally
@@ -48,6 +49,9 @@ const setExceptions = {
 
     ], 
     'ana': [
+
+    ],
+    'vow': [
 
     ],
 };
