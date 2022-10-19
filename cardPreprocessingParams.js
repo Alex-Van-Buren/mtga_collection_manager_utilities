@@ -3,7 +3,8 @@
  */
 
 /** The most up-to-date Default Cards Bulk Data JSON from Scryfall */
-const cards = require('./default-cards-20211111220310.json');
+// https://scryfall.com/docs/api/bulk-data
+const cards = require('./default-cards-20221019090457.json');
 
 /** Extracted Card Data from game files. Used for adding arenaIds because Scryfall is slow to add arena Ids*/
 const j21Cards = require('./extractedSetData/j21.json');
