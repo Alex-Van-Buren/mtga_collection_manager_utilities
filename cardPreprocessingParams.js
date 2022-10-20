@@ -23,7 +23,10 @@ const filterArtIDs = [ 75382, 75910, 75381, 77382 ]; // Not exported, used inter
 /** Unwanted cards to filter out using set code and collector number */
 const filterArtCollector = {
     mid: ['386', '385'], 
-    pana: ['249', '252', '253', '248', '250', '251', '255', '254', '247', '246'] // Duplicate basic land arts
+    pana: ['249', '252', '253', '248', '250', '251', '255', '254', '247', '246'], // Duplicate basic land arts
+    neo: ['507'],
+    stx: ['376'],
+    snc: ['461'],
 }
 
 /** Card sets to include even if they don't have arena_ids */
