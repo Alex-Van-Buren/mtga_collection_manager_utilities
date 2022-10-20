@@ -61,6 +61,14 @@ for ( let card of cards ) {
             if (!filterAltArt(card.arena_id, card.promo_types, card.set, card.collector_number)) {
                 continue;
             }
+
+            /* Alchemy rebalanced cards have collector numbers that feature 'A-' followed by the unaltered cards collector number. eg 'A-234'
+            Specialize cards cards feature collector numbers that have the normal collector number followed by wubrg. eg '5r'
+            Filter these out by checking if the collector number contains letters.
+            */
+            if (/[a-zA-Z]/.test(card.collector_number)) { // regex.test(str) returns true if collector number contains a letter
+                continue;
+            }
         }
 
         /* 
