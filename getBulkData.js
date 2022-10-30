@@ -25,7 +25,7 @@ async function getDownloadURL() {
         throw new Error(`getDownloadURL: 'default_cards' type not found in response.data list of objects.\ndata=${data}`)
     }
 
-    const downloadURL = res.data.data.find( obj => obj.type === 'default_cards').download_uri
+    const downloadURL = defaultCardObjectData.download_uri
     if (!downloadURL) {
         throw new Error(`getDownloadURL: Response object does not contain a "download_uri" property.\nobject = ${defaultCardObjectData}`)
     }
