@@ -1,18 +1,40 @@
 const fs = require('fs'); // For writing a new file
 
 const { 
-    cards, addArenaId, setExceptions, replacementImages, extraReplacements, 
+    addArenaId, setExceptions, replacementImages, extraReplacements, 
     desiredProperties, desiredLegalities, desiredCardFaceProps, filterAltArt, changeProperties
 } = require('./cardPreprocessingParams'); // Parameters describing source data, exceptions, exclusions, etc.
 
 /**
  * This file preprocess the bulk data from Scryfall, creating a json file as output.
  * 
- * @authors @Alex-Van-Buren @Nate-Sackett
+ * @authors @Alex-Van-Buren @NateSackett
  */
 
 // An array that will hold cards after preprocessing
 const returnCards = [];
+
+/**
+ * Get most recent default cards file
+ */
+function getCards() {
+    // Search for most recent default cards file name
+    const files = fs.readdirSync('./')
+    cardFile = '';
+    for (const file of files) {
+        if (file.includes('default-cards-')) {
+            cardFile = file;
+        }
+    }
+
+    if (cardFile === "") {
+        throw new Error("default cards file not found");
+    }
+
+    // Return file
+    return cardFile
+}
+const cards = require(`./${getCards()}`);
 
 // Preprocess cards, removing all without an arena id, and removing undesired properties
 for ( let card of cards ) {

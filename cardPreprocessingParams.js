@@ -2,10 +2,6 @@
  * This file specifies all parameters for the cardPreprocessing file.
  */
 
-/** The most up-to-date Default Cards Bulk Data JSON from Scryfall */
-// https://scryfall.com/docs/api/bulk-data
-const cards = require('./default-cards-20221019090457.json');
-
 /** Extracted Card Data from game files. Used for adding arenaIds because Scryfall is slow to add arena Ids*/
 const j21Cards = require('./extractedSetData/j21.json');
 const mh1Cards = require('./extractedSetData/mh1.json');
@@ -329,7 +325,6 @@ function addArenaId(card) {
 }
 
 module.exports = {
-    cards,
     addArenaId,
     setExceptions,
     replacementImages,
