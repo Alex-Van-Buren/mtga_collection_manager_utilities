@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/Alex-Van-Buren/mtga_collection_manager_utilities/issues"
   },
-  "homepage": "https://github.com/Alex-Van-Buren/mtga_collection_manager_utilities#readme"
+  "homepage": "https://github.com/Alex-Van-Buren/mtga_collection_manager_utilities#readme",
+  "dependencies": {
+    "axios": "^1.1.3"
+  }
 }
