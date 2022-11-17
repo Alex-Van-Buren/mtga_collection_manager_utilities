@@ -23,6 +23,7 @@ const filterArtCollector = {
     neo: ['507'],
     stx: ['376'],
     snc: ['461'],
+    bro: ['378'],
 }
 
 /** Card sets to include even if they don't have arena_ids */
@@ -208,6 +209,14 @@ const changeCards = {
         return false;
     }
 
+    // For brothers war retro artifacts cards with collector numbers 63 and below should be kept others not
+    if (setId === 'brr') {
+        if (parseInt(collector_number) <= 63){
+            return true
+        }
+        return false
+    }
+
     // Keep all of strixhaven mystical archives
     if (setId === 'sta') {
         return true;
@@ -249,8 +258,8 @@ function changeProperties(card) {
         card.booster = true;
     }
 
-    // set mystical archives cards booster value to true
-    if (card.set === 'sta') {
+    // set mystical archives and brothers' war retro artifacts cards booster value to true
+    if (card.set === 'sta' || card.set === 'brr') {
         card.booster = true;
     }
 

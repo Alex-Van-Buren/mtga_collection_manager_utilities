@@ -89,7 +89,11 @@ for ( let card of cards ) {
             Filter these out by checking if the collector number contains letters.
             */
             if (/[a-zA-Z]/.test(card.collector_number)) { // regex.test(str) returns true if collector number contains a letter
-                continue;
+                // Meld cards are 2 cards that combine under conditions. One of the cards will have a collector number followed by 'a' (eg 123a) which we
+                // want to keep. The other will be followed by a b which we do not want to keep
+                if (!(/\d{3}a/.test(card.collector_number))){
+                    continue;
+                }
             }
         }
 
